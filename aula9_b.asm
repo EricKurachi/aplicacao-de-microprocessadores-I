@@ -1,0 +1,123 @@
+		ORG 0
+		MOV R0, #077H
+		MOV R3, #00H
+		MOV R4, #00H
+		MOV R5, #00H
+		MOV R1, #00H
+LOOP:		LCALL VARRE_TECLA
+		SJMP LOOP
+;*******************************************
+;SUBROTINA DE VARREDURA DO TECLADO
+;*******************************************
+VARRE_TECLA:	ACALL LATCH
+		ACALL BUFFER
+		RL  A
+		CJNE A, #0FFH, TECLA0
+		ACALL COMANDO
+		MOV A, R7
+		RET
+;*******************************************
+LATCH:   	MOV A, R0
+		MOV R0, A
+		MOV DPTR, #8000H
+		ORL A, #0F0H
+		MOVX @DPTR, A
+
+		RET
+;*******************************************
+BUFFER:   	MOVX A, @DPTR
+		ORL  A, #0FH
+		RET
+;*******************************************
+TECLA0: 	MOV R1, A
+		MOV A, R0
+		ORL A, #0F0H
+		ANL A, R1
+		CJNE A, #77H, TECLA1
+		MOV R2, #00
+		RET
+TECLA1:   	CJNE A, #0EEH, TECLA2
+		MOV R2, #01
+		RET
+TECLA2:   	CJNE A, #0EDH, TECLA3
+		MOV R2, #02
+		RET
+TECLA3:   	CJNE A, #0EBH, TECLA4
+		MOV R2, #03
+		RET
+TECLA4:   	CJNE A, #0E7H, TECLA5
+		MOV R2, #04
+		RET
+TECLA5:   	CJNE A, #0DEH, TECLA6
+		MOV R2, #05
+		RET
+TECLA6:   	CJNE A, #0DDH, TECLA7
+		MOV R2, #06
+		RET
+TECLA7:   	CJNE A, #0DBH, TECLA8
+		MOV R2, #07
+		RET
+TECLA8:   	CJNE A, #0D7H, TECLA9
+		MOV R2, #08
+		RET
+TECLA9:   	CJNE A, #0BEH, TECLAA
+		MOV R2, #09
+		RET
+TECLAA:   	CJNE A, #0BDH, TECLAB
+		MOV R2, #0AH
+		RET
+TECLAB:   	CJNE A, #0BBH, TECLAC
+		MOV R2, #0BH
+		RET
+TECLAC:   	CJNE A, #0B7H, TECLAD
+		MOV R2, #0CH
+		RET
+TECLAD:   	CJNE A, #7EH, TECLAE
+		MOV R2, #0DH
+		RET
+TECLAE:   	CJNE A, #7DH, TECLAF
+		MOV R2, #0EH
+		RET
+TECLAF:   	CJNE A, #0EEH, ERRO
+		MOV R2, #7BH
+		RET
+ERRO:		MOV R2, #0FFH
+		RET
+;**********************************************
+COMANDO:CJNE A, #0FFH, INICIO
+	RET
+INICIO:	MOV R7, A
+	MOV A, R2
+	CJNE R5, #00H, ENTER
+	CJNE R3, #00H, SEG
+	MOV R3, A
+	RET
+SEG:	CJNE R4, #00H, TERC
+	MOV R4, A
+	RET
+TERC:   CJNE A, #0AH, QUART
+	CLR P1.1
+	MOV R5, #01H
+	RET
+QUART:  CJNE A, #0BH, ENTER
+	SETB P1.1
+	MOV R5, #01H
+	RET
+ENTER:  CJNE A, #0FH, SAIR
+PASSO:	SETB P1.0
+	CLR P1.0
+	INC R1
+	DJNZ R3, PASSO
+	MOV R6, #0AH
+DEZENA:	SETB P1.0
+	CLR P1.0
+	INC R1
+	DJNZ R6, DEZENA
+	MOV R6, #0AH
+	DJNZ R4, DEZENA
+	MOV R3, #00H
+	MOV R4, #00H
+	MOV R5, #00H
+	MOV R1, #00H
+SAIR:	RET
+	END
